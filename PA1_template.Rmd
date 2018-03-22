@@ -1,25 +1,127 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "activity_monitoring"
+author: "Sanjeev Kumar"
+date: "March 21, 2018"
+output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-## Loading and preprocessing the data
+## R Markdown
 
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-
-## Total number of steps taken per day?
-
-
-
-## Average daily activity pattern?
-
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 
-## Imputing missing values
+## Including Plots
+
+You can also embed plots, for example:
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+library(lubridate)
+library(ggplot2)
+
+act_monit <- read.csv("activity.csv", sep = ",", header = TRUE)
+act_monit$date = as.Date(act_monit$date)
+act_monit$day <- day(act_monit$date)
+act_monit_subset <- na.omit(act_monit)
+
+# Total steps per day
+t_steps <- aggregate(act_monit_subset$steps ~ act_monit_subset$day, FUN = sum)
+t_steps[,2]
+# Histograms
+# Steps per day seperated by month
+ggplot(act_monit_subset, aes(x=date, y=steps)) + 
+  geom_histogram(stat="identity", binwidth = 30) + 
+  ggtitle("Total number of steps taken per day (separated by month)") + 
+  xlab("Date") + 
+  ylab("Steps")
 
 
 
-## Differences in activity patterns between weekdays and weekends?
+# Steps per day seperated by day
+ggplot(act_monit_subset, aes(x=day, y=steps)) + 
+  geom_histogram(stat="identity") + 
+  ggtitle("Total number of steps taken per day") + 
+  xlab("Day") + 
+  ylab("Steps")
+
+
+
+# Mean
+mean(t_steps[,2])
+
+# median
+median(t_steps[,2])
+
+# average daily activity pattern
+
+average_steps <- aggregate(act_monit_subset$steps ~ act_monit_subset$interval, FUN = mean)
+names(average_steps) <- c("interval", "steps")
+
+ggplot(average_steps, aes(x=average_steps[,1], y=average_steps[,2])) + 
+  geom_line() + 
+  xlab("Interval") + 
+  ylab("Avg Steps")
+
+
+# maximum no. of steps
+average_steps[average_steps[,2] == max(average_steps[,2]),]
+
+# imputing missing data
+sum(is.na(act_monit))
+
+# Creating new data with filling mising values
+filled_data <- act_monit
+for(i in 1:nrow(filled_data)){
+  if(is.na(filled_data$steps[i])){
+    filled_data$steps[i] <- mean(filled_data$steps, na.rm = TRUE)
+  }
+}
+sum(is.na(filled_data))
+
+# impact of imputing missing data 
+ggplot(filled_data, aes(x=date, y=steps)) + 
+  geom_histogram(stat="identity") + 
+  ggtitle("Total number of steps taken per day (separated by month)") + 
+  xlab("Date") + 
+  ylab("Steps")
+
+
+
+ggplot(filled_data, aes(x=day, y=steps)) + 
+  geom_histogram(stat="identity") + 
+  ggtitle("Total number of steps taken per day") + 
+  xlab("Day") + 
+  ylab("Steps")
+
+
+
+new_value <- aggregate(filled_data$steps ~ filled_data$date, FUN = sum)
+mean(new_mean[,2])
+
+median(new_value[,2])
+
+#  5-minute interval across weekdays and weekends
+filled_data$weekday <- ifelse(weekdays(filled_data$date) == "Saturday" | weekdays(filled_data$date) == "Sunday", "weekend", "weekday")
+table(filled_data$weekday)
+
+# panel plot
+aggregate_value <- aggregate(filled_data$steps, list(filled_data$interval, filled_data$weekday), FUN = mean)
+names(aggregate_value) <- c("steps", "weekday", "interval")
+
+ggplot(aggregate_value, aes(x=steps, y=interval)) + 
+  geom_line() + 
+  xlab("Interval") + 
+  ylab("Avg Steps") + 
+  facet_grid(.~weekday)
+
+
+
+
