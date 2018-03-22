@@ -10,11 +10,11 @@ output:
 
 
 
-## What is mean total number of steps taken per day?
+## Total number of steps taken per day?
 
 
 
-## What is the average daily activity pattern?
+## Average daily activity pattern?
 
 
 
@@ -22,4 +22,4 @@ output:
 
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+## Differences in activity patterns between weekdays and weekends?
